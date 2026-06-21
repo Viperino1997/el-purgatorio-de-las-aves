@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <script src="./support.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/SplitText.min.js"></script>
 </head>
 <body>
 <x-dc>
@@ -11,15 +14,94 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,ital,wght@9..144,0,300;9..144,0,400;9..144,0,500;9..144,0,600;9..144,1,400;9..144,1,500&family=Source+Serif+4:opsz,wght@8..60,300;8..60,400;8..60,600&family=Special+Elite&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%230b0f1a'/%3E%3Cpath d='M28 60 C 37 46,50 42,56 46 C 62 42,75 46,84 60 C 71 53,62 56,56 60 C 50 56,41 53,28 60 Z' fill='%23d96b65'/%3E%3C/svg%3E">
 <style>
+  :root{
+    --ink:#0b0f1a; --ink-2:#0c1120; --ink-rise:#1a2138;
+    --paper:#f3ecdc; --paper-ink:#1c2441; --paper-ink-soft:#2a2c3f;
+    --ember:#9a2d2c; --ember-text:#d96b65; --ember-bright:#c0524f;
+    --mist:#aeb4c2; --mist-dim:#7e8597; --line:#25304d; --line-strong:#6b7690;
+    --focus:#d96b65;
+  }
   *{box-sizing:border-box}
-  html,body{margin:0;padding:0;background:#0b0f1a}
-  ::selection{background:#9a2d2c;color:#f3ecdc}
+  html,body{margin:0;padding:0;background:var(--ink)}
+  ::selection{background:var(--ember);color:var(--paper)}
   @keyframes purgFloat{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-16px) rotate(1.2deg)}}
   @keyframes purgSmoke{0%{opacity:0;transform:translateY(8px) translateX(0) scaleY(.6)}16%{opacity:.55}100%{opacity:0;transform:translateY(-160px) translateX(18px) scaleY(1.35)}}
   @keyframes purgScrollCue{0%,100%{opacity:.25;transform:translateY(0)}50%{opacity:.85;transform:translateY(8px)}}
   @keyframes purgFlick{0%,100%{opacity:.86}48%{opacity:1}52%{opacity:.72}}
   @keyframes purgEmber{0%,100%{opacity:.5;transform:translateY(0)}50%{opacity:1;transform:translateY(-2px)}}
+
+  a{color:inherit}
+  /* visible keyboard focus across the whole site (was missing entirely) */
+  a:focus-visible,[tabindex]:focus-visible,[role="button"]:focus-visible{outline:2px solid var(--focus);outline-offset:3px;border-radius:3px}
+  :focus:not(:focus-visible){outline:none}
+  [data-causa]:focus-visible,[data-restore]:focus-visible{outline-offset:-2px}
+
+  /* mobile refinements: keep hero meta from colliding, calm the ghost birds */
+  @media (max-width:560px){
+    .purg-hero-meta{padding:0 16px !important}
+    .purg-hero-meta span{font-size:10px !important;letter-spacing:1.3px !important}
+    .purg-ghost{opacity:.16 !important}
+    .purg-ghost--sm{width:74px !important}
+    .purg-ghost--md{width:92px !important}
+  }
+
+  /* ============================================================
+     ELEVATION LAYER — atmosphere, editorial detail, depth.
+     Purely visual: content, logic and brand identity untouched.
+     ============================================================ */
+
+  /* film grain — faint printed-page / old-film tactility over the whole piece */
+  body::after{
+    content:"";position:fixed;inset:0;z-index:70;pointer-events:none;opacity:.05;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* vignette on dark sections — pull the eye to the centre, deepen the void */
+  .purg-vig::after{
+    content:"";position:absolute;inset:0;z-index:1;pointer-events:none;
+    background:radial-gradient(135% 108% at 50% 42%, transparent 46%, rgba(4,6,11,.62) 100%);
+  }
+
+  /* threshold — cream sections emerge from shadow, so the reader DESCENDS, not cuts */
+  .purg-threshold{box-shadow:inset 0 46px 70px -52px rgba(0,0,0,.6), inset 0 -46px 70px -52px rgba(0,0,0,.55)}
+
+  /* editorial drop cap for the opening confession */
+  .purg-lead::first-letter{
+    font-family:'Fraunces',serif;font-weight:400;float:left;font-size:4.4em;line-height:.72;
+    padding:10px 14px 0 0;color:var(--ember);
+  }
+
+  /* the title smoulders */
+  .purg-title{text-shadow:0 0 55px rgba(154,45,44,.22)}
+  .purg-ember-word{text-shadow:0 0 34px rgba(192,82,79,.55)}
+
+  /* drifting embers rising through the dark */
+  @keyframes purgRise{
+    0%{transform:translateY(0) translateX(0) scale(1);opacity:0}
+    14%{opacity:.85}
+    70%{opacity:.5}
+    100%{transform:translateY(-82vh) translateX(26px) scale(.4);opacity:0}
+  }
+  .purg-embers{position:absolute;inset:0;z-index:1;pointer-events:none;overflow:hidden}
+  .purg-embers span{position:absolute;bottom:-8px;width:3px;height:3px;border-radius:50%;
+    background:var(--ember-text);box-shadow:0 0 7px 1px rgba(217,107,101,.75);animation:purgRise linear infinite}
+
+  /* primary CTA gains weight, an ember halo, and lifts on hover */
+  .purg-cta-primary{box-shadow:0 10px 30px -8px rgba(154,45,44,.7), inset 0 0 0 1px rgba(217,107,101,.25);
+    transition:transform .25s ease, box-shadow .25s ease, background .2s ease}
+  .purg-cta-primary:hover{transform:translateY(-2px);box-shadow:0 16px 42px -8px rgba(154,45,44,.85), inset 0 0 0 1px rgba(217,107,101,.5)}
+
+  /* accordion rows read like branches — an ember mark grows on hover/focus */
+  .purg-row::before{content:"";position:absolute;left:-2px;top:50%;width:2px;height:0;background:var(--ember-text);
+    transform:translateY(-50%);transition:height .3s ease}
+  .purg-row:hover::before,.purg-row:focus-visible::before{height:62%}
+
+  /* honour the user's reduced-motion preference */
+  @media (prefers-reduced-motion: reduce){
+    *,*::before,*::after{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important;scroll-behavior:auto !important}
+  }
 </style>
 </helmet>
 <div style="font-family:'Source Serif 4',serif;background:#0b0f1a;position:relative">
@@ -32,30 +114,39 @@
     </a>
   </div>
 
-  <section ref="{{ setHero }}" data-screen-label="Portada" style="position:relative;min-height:100vh;width:100%;background:radial-gradient(130% 100% at 50% 120%, #1a2138 0%, #10182a 42%, #0a0e18 100%);color:#f3ecdc;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 24px 64px;overflow:hidden;text-align:center">
+  <section ref="{{ setHero }}" data-screen-label="Portada" class="purg-vig" style="position:relative;min-height:100vh;width:100%;background:radial-gradient(130% 100% at 50% 120%, #1a2138 0%, #10182a 42%, #0a0e18 100%);color:#f3ecdc;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 24px 64px;overflow:hidden;text-align:center">
 
     <div style="position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.9">
-      <div ref="{{ addDepth }}" data-depth="0.05" style="position:absolute;top:12%;left:6%;width:128px;opacity:.34;will-change:transform"><img src="assets/aux-2.png" style="width:100%;display:block;transform:scaleX(-1);filter:grayscale(1) brightness(1.15) invert(.9)"></div>
-      <div ref="{{ addDepth }}" data-depth="0.09" style="position:absolute;top:16%;right:7%;width:150px;opacity:.3;will-change:transform"><img src="assets/aux-4.png" style="width:100%;display:block;transform:scaleX(-1);filter:grayscale(1) brightness(1.15) invert(.9)"></div>
-      <div ref="{{ addDepth }}" data-depth="0.13" style="position:absolute;bottom:14%;left:9%;width:118px;opacity:.28;will-change:transform"><img src="assets/aux-5.png" style="width:100%;display:block;filter:grayscale(1) brightness(1.15) invert(.9)"></div>
+      <div ref="{{ addDepth }}" data-depth="0.05" class="purg-ghost purg-ghost--md" style="position:absolute;top:12%;left:6%;width:128px;opacity:.34;will-change:transform"><img src="assets/aux-2.png" style="width:100%;display:block;transform:scaleX(-1);filter:grayscale(1) brightness(1.15) invert(.9)"></div>
+      <div ref="{{ addDepth }}" data-depth="0.09" class="purg-ghost purg-ghost--md" style="position:absolute;top:16%;right:7%;width:150px;opacity:.3;will-change:transform"><img src="assets/aux-4.png" style="width:100%;display:block;transform:scaleX(-1);filter:grayscale(1) brightness(1.15) invert(.9)"></div>
+      <div ref="{{ addDepth }}" data-depth="0.13" class="purg-ghost purg-ghost--sm" style="position:absolute;bottom:14%;left:9%;width:118px;opacity:.28;will-change:transform"><img src="assets/aux-5.png" style="width:100%;display:block;filter:grayscale(1) brightness(1.15) invert(.9)"></div>
     </div>
 
-    <div style="position:absolute;top:24px;left:0;right:0;z-index:6;display:flex;align-items:center;justify-content:space-between;padding:0 32px;pointer-events:none">
+    <div class="purg-embers" aria-hidden="true">
+      <span style="left:16%;animation-duration:7.5s;animation-delay:0s"></span>
+      <span style="left:31%;animation-duration:9.5s;animation-delay:1.6s"></span>
+      <span style="left:46%;animation-duration:8s;animation-delay:3.1s"></span>
+      <span style="left:59%;animation-duration:10.5s;animation-delay:.8s"></span>
+      <span style="left:73%;animation-duration:8.8s;animation-delay:2.4s"></span>
+      <span style="left:87%;animation-duration:11s;animation-delay:4s"></span>
+    </div>
+
+    <div class="purg-hero-meta" style="position:absolute;top:24px;left:0;right:0;z-index:6;display:flex;align-items:center;justify-content:space-between;padding:0 32px;pointer-events:none">
       <span style="font-family:'Special Elite',monospace;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#7e8597">Poemario · MMXXVI</span>
       <span style="font-family:'Special Elite',monospace;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#7e8597">Mercedes G. Ross</span>
     </div>
 
-    <span style="position:relative;z-index:2;font-family:'Special Elite',monospace;font-size:clamp(10px,2.2vw,13px);letter-spacing:4px;color:#9a2d2c;text-transform:uppercase;margin-bottom:18px">Recopilado de causas perdidas</span>
+    <span style="position:relative;z-index:2;font-family:'Special Elite',monospace;font-size:clamp(10px,2.2vw,13px);letter-spacing:4px;color:var(--ember-text);text-transform:uppercase;margin-bottom:18px">Recopilado de causas perdidas</span>
 
-    <h1 ref="{{ setTitle }}" style="position:relative;z-index:2;font-family:'Fraunces',serif;font-weight:300;font-size:clamp(46px,12vw,150px);line-height:.9;letter-spacing:-2px;margin:0;text-transform:uppercase;will-change:transform">
+    <h1 ref="{{ setTitle }}" class="purg-title" style="position:relative;z-index:2;font-family:'Fraunces',serif;font-weight:300;font-size:clamp(46px,12vw,150px);line-height:.9;letter-spacing:-2px;margin:0;text-transform:uppercase;will-change:transform">
       <span style="display:block">El purgatorio</span>
-      <span style="display:block;font-style:italic;font-weight:400">de las <span style="color:#9a2d2c">aves</span></span>
+      <span style="display:block;font-style:italic;font-weight:400">de las <span class="purg-ember-word" style="color:var(--ember-bright)">aves</span></span>
     </h1>
 
     <div style="position:relative;z-index:2;margin-top:34px;width:min(300px,52vw);animation:purgFloat 7.5s ease-in-out infinite">
       <div ref="{{ setBirdParallax }}" style="will-change:transform">
         <div style="transition:transform 1.4s cubic-bezier(.45,0,.65,1),opacity 1.2s ease-in;transform:{{ birdTransform }};opacity:{{ birdOpacity }};will-change:transform,opacity">
-          <img src="assets/protagonist.png" onClick="{{ depart }}" title="haz clic en el ave" style="width:100%;display:block;cursor:pointer;filter:drop-shadow(0 18px 30px rgba(0,0,0,.55))">
+          <img src="assets/protagonist.png" onClick="{{ depart }}" tabindex="0" role="button" data-depart="1" aria-label="Dejar partir el alma del ave" title="haz clic en el ave" style="width:100%;display:block;cursor:pointer;filter:drop-shadow(0 18px 30px rgba(0,0,0,.55))">
         </div>
       </div>
       <div style="position:absolute;left:14%;bottom:58%;width:62px;height:175px;pointer-events:none;z-index:3;transition:opacity 1.4s ease .8s;opacity:{{ smokeOpacity }}">
@@ -66,7 +157,7 @@
     </div>
 
     <sc-if value="{{ departed }}" hint-placeholder-val="{{ false }}">
-      <div onClick="{{ restore }}" style="position:relative;z-index:6;margin-top:18px;font-family:'Special Elite',monospace;font-size:12px;letter-spacing:1px;color:#aeb4c2;cursor:pointer;border-bottom:1px solid #9a2d2c;padding-bottom:3px;white-space:nowrap">el alma partió — vuelve a mirarla ↺</div>
+      <div onClick="{{ restore }}" tabindex="0" role="button" data-restore="1" style="position:relative;z-index:6;margin-top:8px;font-family:'Special Elite',monospace;font-size:12px;letter-spacing:1px;color:#aeb4c2;cursor:pointer;padding:15px 12px;white-space:nowrap"><span style="border-bottom:1px solid var(--ember-text);padding-bottom:3px">el alma partió — vuelve a mirarla ↺</span></div>
     </sc-if>
 
     <div style="position:absolute;bottom:30px;left:50%;transform:translateX(-50%);z-index:5;display:flex;flex-direction:column;align-items:center;gap:8px;animation:purgScrollCue 2.4s ease-in-out infinite;pointer-events:none">
@@ -75,7 +166,7 @@
     </div>
   </section>
 
-  <section data-screen-label="Dedicatoria" style="position:relative;width:100%;background:#f3ecdc;color:#1c2441;display:flex;flex-direction:column;align-items:center;padding:clamp(110px,16vh,190px) 24px;overflow:hidden">
+  <section data-screen-label="Dedicatoria" class="purg-threshold" style="position:relative;width:100%;background:#f3ecdc;color:#1c2441;display:flex;flex-direction:column;align-items:center;padding:clamp(110px,16vh,190px) 24px;overflow:hidden">
     <div style="max-width:620px;width:100%;display:flex;flex-direction:column;align-items:center;gap:clamp(38px,5.5vh,62px)">
 
       <div data-reveal="up" style="opacity:0;transform:translateY(26px);transition:opacity .9s cubic-bezier(.2,.6,.2,1),transform .9s cubic-bezier(.2,.6,.2,1);display:flex;flex-direction:column;align-items:center;gap:24px">
@@ -83,7 +174,7 @@
         <span style="width:40px;height:1px;background:#c9bfa0"></span>
       </div>
 
-      <p data-reveal="up" style="opacity:0;transform:translateY(26px);transition:opacity .9s cubic-bezier(.2,.6,.2,1),transform .9s cubic-bezier(.2,.6,.2,1);font-family:'Source Serif 4',serif;font-weight:300;font-size:clamp(17px,2vw,20px);line-height:1.85;color:#2a2c3f;text-align:left;width:100%;margin:0;text-wrap:pretty">Tuve que canibalizar mi corazón para que deje de pedirme que emprenda viaje al bajo mundo, donde nos guardamos los que bebimos nuestras lágrimas. Recurrente y calamitoso, el panteón de mis deseos se objetó en huelga, indicándome el nicho vacío que llevaba mi nombre. Me demoré demasiado en conquistar la ciudad, Buenos Aires me quedó grande. A veces las cosas me quedan grandes, pero porque me empequeñezco ante mi miedo a ser olvidada. ¿Será que me hice tan pequeña para poder habitar en tus rincones? Amiga mía, mujer despreciable y bella, tengo un último favor que pedirte.</p>
+      <p data-reveal="up" style="opacity:0;transform:translateY(26px);transition:opacity .9s cubic-bezier(.2,.6,.2,1),transform .9s cubic-bezier(.2,.6,.2,1);font-family:'Source Serif 4',serif;font-weight:300;font-size:clamp(17px,2vw,20px);line-height:1.85;color:#2a2c3f;text-align:left;width:100%;margin:0;text-wrap:pretty" class="purg-lead">Tuve que canibalizar mi corazón para que deje de pedirme que emprenda viaje al bajo mundo, donde nos guardamos los que bebimos nuestras lágrimas. Recurrente y calamitoso, el panteón de mis deseos se objetó en huelga, indicándome el nicho vacío que llevaba mi nombre. Me demoré demasiado en conquistar la ciudad, Buenos Aires me quedó grande. A veces las cosas me quedan grandes, pero porque me empequeñezco ante mi miedo a ser olvidada. ¿Será que me hice tan pequeña para poder habitar en tus rincones? Amiga mía, mujer despreciable y bella, tengo un último favor que pedirte.</p>
 
       <p data-reveal="up" style="opacity:0;transform:translateY(26px);transition:opacity .9s cubic-bezier(.2,.6,.2,1),transform .9s cubic-bezier(.2,.6,.2,1);font-family:'Fraunces',serif;font-weight:400;font-style:italic;font-size:clamp(21px,3vw,30px);line-height:1.5;color:#1c2441;text-align:center;margin:0;text-wrap:balance">En tus llagas florecí yo,<br>encontrando los recovecos<br>en la carne viva<br>para embellecer el caos de tu pena.</p>
 
@@ -119,9 +210,9 @@
     </div>
   </section>
 
-  <section data-screen-label="Fragmento" style="position:relative;width:100%;background:radial-gradient(120% 90% at 50% 30%, #161d33 0%, #0c1120 70%);color:#f3ecdc;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:clamp(120px,18vh,220px) 24px;text-align:center;overflow:hidden">
-    <img src="assets/bird-2.png" style="position:absolute;right:4%;top:14%;width:min(230px,34vw);opacity:.06;transform:scaleX(-1);pointer-events:none;filter:grayscale(1) brightness(2.4)">
-    <span data-reveal="up" style="opacity:0;transform:translateY(28px);transition:opacity .9s cubic-bezier(.2,.6,.2,1),transform .9s cubic-bezier(.2,.6,.2,1);font-family:'Special Elite',monospace;font-size:12px;letter-spacing:3px;text-transform:uppercase;color:#9a2d2c;margin-bottom:48px">II · Del cuaderno de madrugada</span>
+  <section data-screen-label="Fragmento" class="purg-vig" style="position:relative;width:100%;background:radial-gradient(120% 90% at 50% 30%, #161d33 0%, #0c1120 70%);color:#f3ecdc;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:clamp(120px,18vh,220px) 24px;text-align:center;overflow:hidden">
+    <img src="assets/bird-2.png" class="purg-drift" style="position:absolute;right:4%;top:14%;width:min(230px,34vw);opacity:.06;transform:scaleX(-1);pointer-events:none;filter:grayscale(1) brightness(2.4)">
+    <span data-reveal="up" style="opacity:0;transform:translateY(28px);transition:opacity .9s cubic-bezier(.2,.6,.2,1),transform .9s cubic-bezier(.2,.6,.2,1);font-family:'Special Elite',monospace;font-size:12px;letter-spacing:3px;text-transform:uppercase;color:var(--ember-text);margin-bottom:48px">II · Del cuaderno de madrugada</span>
     <div style="display:flex;flex-direction:column;gap:6px;font-family:'Fraunces',serif;font-weight:300;font-size:clamp(30px,6vw,68px);line-height:1.12;letter-spacing:-1px">
       <span data-reveal="up" style="opacity:0;transform:translateY(24px);transition:opacity .8s ease .0s,transform .8s ease .0s">No todas las aves</span>
       <span data-reveal="up" style="opacity:0;transform:translateY(24px);transition:opacity .8s ease .12s,transform .8s ease .12s">merecen el cielo.</span>
@@ -131,22 +222,22 @@
     <p data-reveal="up" style="opacity:0;transform:translateY(28px);transition:opacity 1s ease .5s,transform 1s ease .5s;font-family:'Special Elite',monospace;font-size:11px;letter-spacing:2px;color:#7e8597;text-transform:uppercase;margin:56px 0 0">fragmento — uno de cuarenta poemas</p>
   </section>
 
-  <section data-screen-label="El índice del purgatorio" style="position:relative;width:100%;background:#0c1120;color:#f3ecdc;padding:clamp(110px,15vh,190px) clamp(20px,6vw,80px);overflow:hidden">
-    <img src="assets/tree.png" style="position:absolute;right:-6%;bottom:-4%;height:min(86%,720px);width:auto;opacity:.07;pointer-events:none;filter:brightness(2)">
+  <section data-screen-label="El índice del purgatorio" class="purg-vig" style="position:relative;width:100%;background:#0c1120;color:#f3ecdc;padding:clamp(110px,15vh,190px) clamp(20px,6vw,80px);overflow:hidden">
+    <img src="assets/tree.png" class="purg-drift" style="position:absolute;right:-6%;bottom:-4%;height:min(86%,720px);width:auto;opacity:.07;pointer-events:none;filter:brightness(2)">
     <div data-reveal="up" style="opacity:0;transform:translateY(28px);transition:opacity .9s cubic-bezier(.2,.6,.2,1),transform .9s cubic-bezier(.2,.6,.2,1);max-width:680px;margin:0 auto 56px;text-align:center;position:relative;z-index:2">
-      <span style="font-family:'Special Elite',monospace;font-size:12px;letter-spacing:3px;text-transform:uppercase;color:#9a2d2c">III · El árbol de las causas perdidas</span>
+      <span style="font-family:'Special Elite',monospace;font-size:12px;letter-spacing:3px;text-transform:uppercase;color:var(--ember-text)">III · El árbol de las causas perdidas</span>
       <h2 style="font-family:'Fraunces',serif;font-weight:400;font-size:clamp(30px,5.4vw,60px);line-height:1.04;letter-spacing:-1px;margin:16px 0 0">Seis ramas, seis<br><span style="font-style:italic">cosas que cuelgan.</span></h2>
       <p style="font-family:'Source Serif 4',serif;font-weight:300;font-size:clamp(15px,1.8vw,18px);line-height:1.6;color:#9aa0b1;margin:18px auto 0;max-width:46ch">Cada rama sostiene algo que dejó el libro. Abre una para leer lo que pende de ella.</p>
     </div>
 
     <div style="max-width:880px;margin:0 auto;position:relative;z-index:2;border-top:1px solid #25304d">
       <sc-for list="{{ causas }}" as="c" hint-placeholder-count="6">
-        <div onClick="{{ c.toggle }}" data-reveal="up" style="opacity:0;transform:translateY(22px);transition:opacity .7s ease,transform .7s ease,background .3s ease;border-bottom:1px solid #25304d;cursor:pointer;padding:clamp(20px,3vw,30px) 6px" style-hover="background:rgba(154,45,44,.07)">
+        <div onClick="{{ c.toggle }}" tabindex="0" role="button" aria-expanded="{{ c.expanded }}" data-causa="{{ c.num }}" data-reveal="up" class="purg-row" style="opacity:0;transform:translateY(22px);transition:opacity .7s ease,transform .7s ease,background .3s ease;border-bottom:1px solid var(--line);cursor:pointer;padding:clamp(20px,3vw,30px) 6px" style-hover="background:rgba(154,45,44,.07)">
           <div style="display:flex;align-items:baseline;gap:clamp(16px,3vw,40px)">
-            <span style="font-family:'Special Elite',monospace;font-size:13px;color:#9a2d2c;flex:none;width:28px">{{ c.num }}</span>
+            <span style="font-family:'Special Elite',monospace;font-size:13px;color:var(--ember-text);flex:none;width:28px">{{ c.num }}</span>
             <h3 style="flex:1 1 auto;margin:0;font-family:'Fraunces',serif;font-weight:400;font-size:clamp(24px,4.4vw,46px);line-height:1;letter-spacing:-.5px;color:#f3ecdc">{{ c.title }}</h3>
             <span style="flex:none;font-family:'Special Elite',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:#7e8597;align-self:center">{{ c.label }}</span>
-            <span style="flex:none;font-family:'Fraunces',serif;font-size:30px;line-height:1;color:#9a2d2c;width:24px;text-align:center">{{ c.sign }}</span>
+            <span style="flex:none;font-family:'Special Elite',monospace;font-size:18px;line-height:1;color:var(--ember-text);width:24px;text-align:center">{{ c.sign }}</span>
           </div>
           <sc-if value="{{ c.open }}" hint-placeholder-val="{{ false }}">
             <p style="margin:18px 0 4px;padding-left:calc(28px + clamp(16px,3vw,40px));font-family:'Source Serif 4',serif;font-weight:300;font-size:clamp(16px,2vw,20px);line-height:1.7;color:#c4c9d6;max-width:62ch">{{ c.body }}</p>
@@ -156,7 +247,7 @@
     </div>
   </section>
 
-  <section data-screen-label="Sobre la Autora" style="position:relative;width:100%;background:#f3ecdc;color:#1c2441;padding:clamp(110px,15vh,190px) clamp(24px,6vw,80px);overflow:hidden">
+  <section data-screen-label="Sobre la Autora" class="purg-threshold" style="position:relative;width:100%;background:#f3ecdc;color:#1c2441;padding:clamp(110px,15vh,190px) clamp(24px,6vw,80px);overflow:hidden">
     <div style="max-width:1040px;margin:0 auto;display:grid;grid-template-columns:1fr;gap:clamp(40px,6vw,80px);align-items:center">
       <div data-reveal="up" style="opacity:0;transform:translateY(28px);transition:opacity .9s cubic-bezier(.2,.6,.2,1),transform .9s cubic-bezier(.2,.6,.2,1)">
         <span style="font-family:'Special Elite',monospace;font-size:12px;letter-spacing:3px;text-transform:uppercase;color:#9a2d2c">IV · Sobre la autora</span>
@@ -168,19 +259,19 @@
     </div>
   </section>
 
-  <section id="comprar" ref="{{ setBuy }}" data-screen-label="Comprar" style="position:relative;width:100%;min-height:100vh;background:radial-gradient(125% 95% at 50% 0%, #1a2138 0%, #0c1120 58%, #080b14 100%);color:#e8e1cf;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:clamp(110px,14vh,180px) 24px;text-align:center;overflow:hidden">
-    <img src="assets/bird-3.png" style="position:absolute;left:4%;bottom:6%;width:min(280px,38vw);opacity:.08;pointer-events:none;filter:grayscale(1) brightness(2.4)">
+  <section id="comprar" ref="{{ setBuy }}" data-screen-label="Comprar" class="purg-vig" style="position:relative;width:100%;min-height:100vh;background:radial-gradient(125% 95% at 50% 0%, #1a2138 0%, #0c1120 58%, #080b14 100%);color:#e8e1cf;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:clamp(110px,14vh,180px) 24px;text-align:center;overflow:hidden">
+    <img src="assets/bird-3.png" class="purg-drift" style="position:absolute;left:4%;bottom:6%;width:min(280px,38vw);opacity:.08;pointer-events:none;filter:grayscale(1) brightness(2.4)">
     <div style="position:absolute;left:50%;top:9%;transform:translateX(-50%);width:30px;height:120px;pointer-events:none;opacity:.5">
       <div style="position:absolute;inset:0;animation:purgSmoke 5s ease-in infinite"><svg width="30" height="120" viewBox="0 0 30 120" fill="none"><path d="M15 118 C 8 96, 24 84, 15 60 C 6 38, 22 26, 15 0" stroke="#aeb4c2" stroke-width="1.6" stroke-linecap="round"></path></svg></div>
     </div>
 
-    <span data-reveal="up" style="opacity:0;transform:translateY(28px);transition:opacity .9s ease,transform .9s ease;font-family:'Special Elite',monospace;font-size:12px;letter-spacing:3px;text-transform:uppercase;color:#9a2d2c;position:relative;z-index:2">V · Llévatelo a casa</span>
+    <span data-reveal="up" style="opacity:0;transform:translateY(28px);transition:opacity .9s ease,transform .9s ease;font-family:'Special Elite',monospace;font-size:12px;letter-spacing:3px;text-transform:uppercase;color:var(--ember-text);position:relative;z-index:2">V · Llévatelo a casa</span>
     <h2 data-reveal="up" style="opacity:0;transform:translateY(28px);transition:opacity 1s ease .1s,transform 1s ease .1s;font-family:'Fraunces',serif;font-weight:400;font-size:clamp(36px,8vw,86px);line-height:.96;letter-spacing:-2px;margin:18px 0 0;max-width:13ch;text-wrap:balance;position:relative;z-index:2;text-transform:uppercase">El libro<br><span style="font-style:italic;font-weight:300">no muerde.</span></h2>
     <p data-reveal="up" style="opacity:0;transform:translateY(28px);transition:opacity 1s ease .2s,transform 1s ease .2s;font-family:'Source Serif 4',serif;font-weight:300;font-size:clamp(16px,2vw,19px);line-height:1.7;color:#c4c9d6;margin:30px 0 0;max-width:42ch;position:relative;z-index:2">Cuarenta poemas para los desvelados. El PDF llega directo a tu correo después de la compra.</p>
 
     <div data-reveal="up" style="opacity:0;transform:translateY(28px);transition:opacity 1s ease .3s,transform 1s ease .3s;display:flex;gap:16px;flex-wrap:wrap;justify-content:center;margin-top:42px;width:100%;max-width:460px;position:relative;z-index:2">
-      <a href="https://pay.hotmart.com/I106421745S" target="_blank" rel="noopener" style="flex:1 1 200px;min-width:190px;height:56px;display:flex;align-items:center;justify-content:center;background:#9a2d2c;color:#f3ecdc;font-family:'Special Elite',monospace;font-size:14px;letter-spacing:1.2px;text-transform:uppercase;text-decoration:none" style-hover="background:#b23b39" style-active="background:#7a2120">Comprar en Hotmart</a>
-      <a href="#" style="flex:1 1 200px;min-width:190px;height:56px;display:flex;align-items:center;justify-content:center;background:transparent;border:1px solid #4a5470;color:#e8e1cf;font-family:'Special Elite',monospace;font-size:14px;letter-spacing:1.2px;text-transform:uppercase;text-decoration:none" style-hover="background:rgba(255,255,255,.05);border-color:#e8e1cf">Apóyame en Cafecito</a>
+      <a href="https://pay.hotmart.com/I106421745S" target="_blank" rel="noopener" class="purg-cta-primary" style="flex:1 1 200px;min-width:190px;height:56px;display:flex;align-items:center;justify-content:center;background:#9a2d2c;color:#f3ecdc;font-family:'Special Elite',monospace;font-size:14px;letter-spacing:1.2px;text-transform:uppercase;text-decoration:none" style-hover="background:#b23b39" style-active="background:#7a2120">Comprar en Hotmart</a>
+      <a href="#" style="flex:1 1 200px;min-width:190px;height:56px;display:flex;align-items:center;justify-content:center;background:transparent;border:1px solid var(--line-strong);color:#e8e1cf;font-family:'Special Elite',monospace;font-size:14px;letter-spacing:1.2px;text-transform:uppercase;text-decoration:none" style-hover="background:rgba(255,255,255,.05);border-color:#e8e1cf">Apóyame en Cafecito</a>
     </div>
 
     <p data-reveal="up" style="opacity:0;transform:translateY(28px);transition:opacity 1s ease .4s,transform 1s ease .4s;font-family:'Special Elite',monospace;font-size:11px;letter-spacing:1.5px;color:#7e8597;margin:38px 0 0;position:relative;z-index:2">entrega digital · pago seguro · sin envío físico</p>
@@ -209,7 +300,8 @@ class Component extends DCLogic {
       if(this.title){ this.title.style.transform='translate('+(-dx*10)+'px,'+(-dy*8)+'px)'; }
       if(this.parallax && !this.state.departed){ this.parallax.style.transform='translate('+(-dx*20)+'px,'+(-dy*14)+'px)'; }
     };
-    window.addEventListener('mousemove', this._mm, {passive:true});
+    this._reduceMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    if(!this._reduceMotion) window.addEventListener('mousemove', this._mm, {passive:true});
 
     this._scroll = ()=>{
       const de=document.documentElement;
@@ -221,6 +313,7 @@ class Component extends DCLogic {
 
     const reveal=(el)=>{ el.style.opacity='1'; el.style.transform='none'; };
     this._checkReveal = ()=>{
+      if(this._useGsap) return;
       const vh=window.innerHeight||document.documentElement.clientHeight||0;
       document.querySelectorAll('[data-reveal]').forEach(el=>{
         if(el.dataset.revealed) return;
@@ -232,7 +325,7 @@ class Component extends DCLogic {
     window.addEventListener('resize', this._checkReveal, {passive:true});
     requestAnimationFrame(()=>{ this._checkReveal(); });
     // safety: never leave content hidden if scroll events/observers misbehave
-    this._revealSafety = setTimeout(()=>{ document.querySelectorAll('[data-reveal]').forEach(el=>{ if(!el.dataset.revealed){ el.dataset.revealed='1'; reveal(el); } }); }, 2600);
+    this._revealSafety = setTimeout(()=>{ if(this._useGsap) return; document.querySelectorAll('[data-reveal]').forEach(el=>{ if(!el.dataset.revealed){ el.dataset.revealed='1'; reveal(el); } }); }, 2600);
 
     this._pillCheck = ()=>{
       if(!this.hero || !this.pill) return;
@@ -244,6 +337,21 @@ class Component extends DCLogic {
     };
     window.addEventListener('scroll', this._pillCheck, {passive:true});
     requestAnimationFrame(()=>{ this._pillCheck(); });
+
+    // keyboard support for the non-native interactive elements (accordion rows + restore)
+    this._key = (e)=>{
+      if(e.key!=='Enter' && e.key!==' ' && e.key!=='Spacebar') return;
+      const t=e.target;
+      if(!t || !t.closest) return;
+      const row=t.closest('[data-causa]');
+      if(row){ e.preventDefault(); this.toggleCausa(row.getAttribute('data-causa')); return; }
+      if(t.closest('[data-depart]')){ e.preventDefault(); this.depart(); return; }
+      if(t.closest('[data-restore]')){ e.preventDefault(); this.restore(); }
+    };
+    window.addEventListener('keydown', this._key);
+
+    // motion layer (GSAP) — progressive enhancement; degrades to the CSS reveal above
+    this._initGSAP();
   }
   componentWillUnmount(){
     if(this._mm) window.removeEventListener('mousemove', this._mm);
@@ -251,7 +359,49 @@ class Component extends DCLogic {
     if(this._checkReveal){ window.removeEventListener('scroll', this._checkReveal); window.removeEventListener('resize', this._checkReveal); }
     if(this._revealSafety) clearTimeout(this._revealSafety);
     if(this._pillCheck) window.removeEventListener('scroll', this._pillCheck);
+    if(this._key) window.removeEventListener('keydown', this._key);
+    try{ if(window.ScrollTrigger) window.ScrollTrigger.getAll().forEach(t=>t.kill()); if(this._split && this._split.revert) this._split.revert(); }catch(e){}
   }
+
+  _initGSAP(){
+    if(this._reduceMotion) return;                 // honour reduced-motion (CSS reveal handles visibility)
+    const g=window.gsap, ST=window.ScrollTrigger;
+    if(!g || !ST) return;                          // CDN blocked → CSS reveal fallback stays active
+    try{
+      g.registerPlugin(ST);
+      if(window.SplitText) g.registerPlugin(window.SplitText);
+      this._useGsap = true;
+
+      // GSAP owns the easing now — neutralise the CSS transitions on revealing elements
+      g.set('[data-reveal]', {transition:'none'});
+
+      // choreographed scroll reveals (replaces the manual IntersectionObserver loop)
+      this._stReveal = ST.batch('[data-reveal]', {
+        start:'top 88%',
+        onEnter: b=> g.to(b, {opacity:1, y:0, duration:.9, ease:'power3.out', stagger:.09, overwrite:true})
+      });
+
+      // the title assembles itself, letter by letter
+      if(window.SplitText && this.title){
+        g.set(this.title, {opacity:1});
+        // autoSplit waits for webfonts and re-splits on width change (official best practice)
+        this._split = window.SplitText.create(this.title, {
+          type:'chars', autoSplit:true,
+          onSplit:(self)=> g.from(self.chars, {yPercent:130, opacity:0, ease:'power4.out', duration:.9, stagger:.03})
+        });
+      }
+
+      // depth: the decorative birds drift against the scroll
+      g.utils.toArray('.purg-drift').forEach(el=>{
+        g.fromTo(el, {yPercent:16}, {yPercent:-16, ease:'none',
+          scrollTrigger:{trigger:el, start:'top bottom', end:'bottom top', scrub:true}});
+      });
+
+      // recompute trigger positions once the webfonts settle
+      if(document.fonts && document.fonts.ready){ document.fonts.ready.then(()=>{ try{ ST.refresh(); }catch(e){} }); }
+    }catch(e){ this._useGsap=false; /* never let motion break the page */ }
+  }
+  _refreshST(){ if(this._useGsap && window.ScrollTrigger){ requestAnimationFrame(()=>{ try{ window.ScrollTrigger.refresh(); }catch(e){} }); } }
 
   addDepth = (el)=>{ if(el && !this.depth.includes(el)) this.depth.push(el); };
   setBirdParallax = (el)=>{ this.parallax=el; };
@@ -263,6 +413,7 @@ class Component extends DCLogic {
   depart = ()=>{
     if(this.state.departed) return;
     this.setState({departed:true});
+    this._refreshST();
     setTimeout(()=>{
       const el=document.querySelector('[data-screen-label="Dedicatoria"]');
       if(!el) return;
@@ -271,14 +422,14 @@ class Component extends DCLogic {
       try{ window.scrollTo({top:target, behavior:'smooth'}); }catch(e){ de.scrollTop=target; }
     }, 760);
   };
-  restore = ()=>{ this.setState({departed:false}); };
+  restore = ()=>{ this.setState({departed:false}); this._refreshST(); };
   goBuy = (e)=>{
     if(e&&e.preventDefault) e.preventDefault();
     if(this.buy){ try{ this.buy.scrollIntoView; }catch(x){} }
     const de=document.documentElement;
     if(this.buy){ const t=this.buy.getBoundingClientRect().top+de.scrollTop; try{ window.scrollTo({top:t,behavior:'smooth'}); }catch(x){ de.scrollTop=t; } }
   };
-  toggleCausa = (num)=>{ this.setState(s=>({openCausa: s.openCausa===num? null:num})); };
+  toggleCausa = (num)=>{ this.setState(s=>({openCausa: s.openCausa===num? null:num})); this._refreshST(); };
 
   renderVals(){
     const raw=[
@@ -290,7 +441,7 @@ class Component extends DCLogic {
       {num:'06', label:'Lo que dijeron', title:'Comentarios', body:'Anotaciones de los primeros lectores, garabateadas al borde de la página como en un libro prestado que no se piensa devolver.'}
     ];
     const open=this.state.openCausa;
-    const causas=raw.map(c=>({ ...c, open: open===c.num, sign: open===c.num? '–':'+', toggle: ()=>this.toggleCausa(c.num) }));
+    const causas=raw.map(c=>({ ...c, open: open===c.num, expanded: open===c.num? 'true':'false', sign: open===c.num? '–':'+', toggle: ()=>this.toggleCausa(c.num) }));
     const dep=this.state.departed;
     return {
       departed:dep,
