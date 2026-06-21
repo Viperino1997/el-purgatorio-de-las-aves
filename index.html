@@ -104,9 +104,6 @@
   #purg-veil .pv-text{font-family:'Special Elite',monospace;font-size:11px;letter-spacing:5px;text-transform:uppercase;color:var(--mist-dim)}
   @keyframes purgVeilFail{to{opacity:0;visibility:hidden}}
 
-  /* ===== ember cursor trail ===== */
-  #purg-trail{position:fixed;inset:0;z-index:66;pointer-events:none}
-
   /* ===== chapter rail ===== */
   .purg-rail{position:fixed;right:24px;top:50%;transform:translateY(-50%);z-index:75;display:flex;flex-direction:column;gap:16px;align-items:flex-end}
   .purg-rail button{appearance:none;background:none;border:0;cursor:pointer;display:flex;align-items:center;gap:10px;padding:5px;color:var(--mist-dim);font-family:'Special Elite',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase}
@@ -127,7 +124,6 @@
 <div style="font-family:'Source Serif 4',serif;background:#0b0f1a;position:relative">
 
   <div id="purg-veil"><span class="pv-ember"></span><span class="pv-text">un descenso · MMXXVI</span></div>
-  <canvas id="purg-trail"></canvas>
   <nav class="purg-rail" aria-label="Índice de secciones">
     <button data-go="Portada"><span class="pr-label">Portada</span><span class="pr-dot"></span></button>
     <button data-go="Dedicatoria"><span class="pr-label">I · Dedicatoria</span><span class="pr-dot"></span></button>
@@ -386,7 +382,6 @@ class Component extends DCLogic {
 
     // experience layer — intro veil, ember cursor trail, chapter rail, magnetic CTAs
     this._initVeil();
-    this._initTrail();
     this._initRail();
     this._initMagnetic();
   }
@@ -398,9 +393,6 @@ class Component extends DCLogic {
     if(this._pillCheck) window.removeEventListener('scroll', this._pillCheck);
     if(this._key) window.removeEventListener('keydown', this._key);
     try{ if(window.ScrollTrigger) window.ScrollTrigger.getAll().forEach(t=>t.kill()); if(this._split && this._split.revert) this._split.revert(); }catch(e){}
-    if(this._trailRAF) cancelAnimationFrame(this._trailRAF);
-    if(this._trailMove) window.removeEventListener('mousemove', this._trailMove);
-    if(this._trailResize) window.removeEventListener('resize', this._trailResize);
     if(this._railScroll) window.removeEventListener('scroll', this._railScroll);
     if(this._veilTimer) clearTimeout(this._veilTimer);
   }
@@ -460,33 +452,6 @@ class Component extends DCLogic {
       veil.style.transition='opacity .6s ease'; requestAnimationFrame(()=>{ veil.style.opacity='0'; });
       setTimeout(()=>{ clearTimeout(this._veilTimer); done(); }, 700);
     }
-  }
-
-  _initTrail(){
-    const c=document.getElementById('purg-trail'); if(!c) return;
-    if(this._reduceMotion || ('ontouchstart' in window)){ c.style.display='none'; return; }
-    const ctx=c.getContext('2d'); if(!ctx) return;
-    const dpr=Math.min(2, window.devicePixelRatio||1);
-    const size=()=>{ c.width=innerWidth*dpr; c.height=innerHeight*dpr; c.style.width=innerWidth+'px'; c.style.height=innerHeight+'px'; };
-    size(); this._trailResize=size; window.addEventListener('resize', size);
-    const parts=[]; let last=0;
-    this._trailMove=(e)=>{
-      const now=performance.now(); if(now-last<16) return; last=now;
-      const x=e.clientX*dpr, y=e.clientY*dpr;
-      for(let i=0;i<2;i++) parts.push({x:x+(Math.random()*16-8)*dpr, y:y+(Math.random()*16-8)*dpr, vx:(Math.random()-.5)*.4*dpr, vy:(-.4-Math.random()*.6)*dpr, life:1, r:(1+Math.random()*1.8)*dpr});
-      if(parts.length>240) parts.splice(0, parts.length-240);
-    };
-    window.addEventListener('mousemove', this._trailMove, {passive:true});
-    const tick=()=>{
-      ctx.clearRect(0,0,c.width,c.height);
-      for(let i=parts.length-1;i>=0;i--){ const p=parts[i]; p.x+=p.vx; p.y+=p.vy; p.vy-=.01*dpr; p.life-=.022;
-        if(p.life<=0){ parts.splice(i,1); continue; }
-        ctx.globalAlpha=Math.max(0,p.life)*.8; ctx.shadowBlur=8*dpr; ctx.shadowColor='rgba(217,107,101,.85)';
-        ctx.fillStyle='rgba(217,107,101,1)'; ctx.beginPath(); ctx.arc(p.x,p.y,Math.max(.1,p.r*p.life),0,7); ctx.fill();
-      }
-      ctx.globalAlpha=1; ctx.shadowBlur=0; this._trailRAF=requestAnimationFrame(tick);
-    };
-    tick();
   }
 
   _initRail(){
