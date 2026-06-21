@@ -98,6 +98,26 @@
     transform:translateY(-50%);transition:height .3s ease}
   .purg-row:hover::before,.purg-row:focus-visible::before{height:62%}
 
+  /* ===== intro veil (theatre-curtain reveal) ===== */
+  #purg-veil{position:fixed;inset:0;z-index:120;background:var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;animation:purgVeilFail .5s ease 3.4s forwards}
+  #purg-veil .pv-ember{width:9px;height:9px;border-radius:50%;background:var(--ember-text);box-shadow:0 0 26px 7px rgba(217,107,101,.7);animation:purgFlick 1.5s ease-in-out infinite}
+  #purg-veil .pv-text{font-family:'Special Elite',monospace;font-size:11px;letter-spacing:5px;text-transform:uppercase;color:var(--mist-dim)}
+  @keyframes purgVeilFail{to{opacity:0;visibility:hidden}}
+
+  /* ===== ember cursor trail ===== */
+  #purg-trail{position:fixed;inset:0;z-index:66;pointer-events:none}
+
+  /* ===== chapter rail ===== */
+  .purg-rail{position:fixed;right:24px;top:50%;transform:translateY(-50%);z-index:75;display:flex;flex-direction:column;gap:16px;align-items:flex-end}
+  .purg-rail button{appearance:none;background:none;border:0;cursor:pointer;display:flex;align-items:center;gap:10px;padding:5px;color:var(--mist-dim);font-family:'Special Elite',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase}
+  .purg-rail .pr-dot{width:7px;height:7px;border-radius:50%;border:1px solid var(--mist-dim);transition:transform .35s ease,background .35s ease,border-color .35s ease,box-shadow .35s ease}
+  .purg-rail .pr-label{opacity:0;transform:translateX(8px);transition:opacity .35s ease,transform .35s ease;white-space:nowrap}
+  .purg-rail button:hover .pr-label,.purg-rail button:focus-visible .pr-label{opacity:1;transform:none}
+  .purg-rail button.active{color:var(--ember-text)}
+  .purg-rail button.active .pr-dot{background:var(--ember-text);border-color:var(--ember-text);box-shadow:0 0 10px 2px rgba(217,107,101,.6);transform:scale(1.2)}
+  .purg-rail button.active .pr-label{opacity:1;transform:none}
+  @media (max-width:900px){.purg-rail{display:none}}
+
   /* honour the user's reduced-motion preference */
   @media (prefers-reduced-motion: reduce){
     *,*::before,*::after{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important;scroll-behavior:auto !important}
@@ -105,6 +125,17 @@
 </style>
 </helmet>
 <div style="font-family:'Source Serif 4',serif;background:#0b0f1a;position:relative">
+
+  <div id="purg-veil"><span class="pv-ember"></span><span class="pv-text">un descenso · MMXXVI</span></div>
+  <canvas id="purg-trail"></canvas>
+  <nav class="purg-rail" aria-label="Índice de secciones">
+    <button data-go="Portada"><span class="pr-label">Portada</span><span class="pr-dot"></span></button>
+    <button data-go="Dedicatoria"><span class="pr-label">I · Dedicatoria</span><span class="pr-dot"></span></button>
+    <button data-go="Fragmento"><span class="pr-label">II · Fragmento</span><span class="pr-dot"></span></button>
+    <button data-go="El índice del purgatorio"><span class="pr-label">III · El árbol</span><span class="pr-dot"></span></button>
+    <button data-go="Sobre la Autora"><span class="pr-label">IV · La autora</span><span class="pr-dot"></span></button>
+    <button data-go="Comprar"><span class="pr-label">V · Llévatelo</span><span class="pr-dot"></span></button>
+  </nav>
 
   <div style="position:fixed;top:0;left:0;height:3px;width:{{ progress }};background:linear-gradient(90deg,#9a2d2c,#c0524f);z-index:90;transition:width .12s linear"></div>
 
@@ -352,6 +383,12 @@ class Component extends DCLogic {
 
     // motion layer (GSAP) — progressive enhancement; degrades to the CSS reveal above
     this._initGSAP();
+
+    // experience layer — intro veil, ember cursor trail, chapter rail, magnetic CTAs
+    this._initVeil();
+    this._initTrail();
+    this._initRail();
+    this._initMagnetic();
   }
   componentWillUnmount(){
     if(this._mm) window.removeEventListener('mousemove', this._mm);
@@ -361,6 +398,11 @@ class Component extends DCLogic {
     if(this._pillCheck) window.removeEventListener('scroll', this._pillCheck);
     if(this._key) window.removeEventListener('keydown', this._key);
     try{ if(window.ScrollTrigger) window.ScrollTrigger.getAll().forEach(t=>t.kill()); if(this._split && this._split.revert) this._split.revert(); }catch(e){}
+    if(this._trailRAF) cancelAnimationFrame(this._trailRAF);
+    if(this._trailMove) window.removeEventListener('mousemove', this._trailMove);
+    if(this._trailResize) window.removeEventListener('resize', this._trailResize);
+    if(this._railScroll) window.removeEventListener('scroll', this._railScroll);
+    if(this._veilTimer) clearTimeout(this._veilTimer);
   }
 
   _initGSAP(){
@@ -402,6 +444,75 @@ class Component extends DCLogic {
     }catch(e){ this._useGsap=false; /* never let motion break the page */ }
   }
   _refreshST(){ if(this._useGsap && window.ScrollTrigger){ requestAnimationFrame(()=>{ try{ window.ScrollTrigger.refresh(); }catch(e){} }); } }
+
+  _initVeil(){
+    const veil=document.getElementById('purg-veil'); if(!veil) return;
+    const done=()=>{ veil.style.display='none'; };
+    this._veilTimer=setTimeout(done, 3600);                  // failsafe: never trap the page behind the veil
+    if(this._reduceMotion){ veil.style.display='none'; clearTimeout(this._veilTimer); return; }
+    const g=window.gsap;
+    if(g){
+      g.timeline({delay:.2, onComplete:()=>{ clearTimeout(this._veilTimer); done(); }})
+        .to(veil.querySelector('.pv-ember'), {scale:2.6, opacity:0, duration:.7, ease:'power2.in'}, .9)
+        .to(veil.querySelector('.pv-text'),  {opacity:0, y:-8, duration:.5}, .9)
+        .to(veil, {yPercent:-100, duration:1.0, ease:'power4.inOut'}, 1.05);
+    } else {
+      veil.style.transition='opacity .6s ease'; requestAnimationFrame(()=>{ veil.style.opacity='0'; });
+      setTimeout(()=>{ clearTimeout(this._veilTimer); done(); }, 700);
+    }
+  }
+
+  _initTrail(){
+    const c=document.getElementById('purg-trail'); if(!c) return;
+    if(this._reduceMotion || ('ontouchstart' in window)){ c.style.display='none'; return; }
+    const ctx=c.getContext('2d'); if(!ctx) return;
+    const dpr=Math.min(2, window.devicePixelRatio||1);
+    const size=()=>{ c.width=innerWidth*dpr; c.height=innerHeight*dpr; c.style.width=innerWidth+'px'; c.style.height=innerHeight+'px'; };
+    size(); this._trailResize=size; window.addEventListener('resize', size);
+    const parts=[]; let last=0;
+    this._trailMove=(e)=>{
+      const now=performance.now(); if(now-last<16) return; last=now;
+      const x=e.clientX*dpr, y=e.clientY*dpr;
+      for(let i=0;i<2;i++) parts.push({x:x+(Math.random()*16-8)*dpr, y:y+(Math.random()*16-8)*dpr, vx:(Math.random()-.5)*.4*dpr, vy:(-.4-Math.random()*.6)*dpr, life:1, r:(1+Math.random()*1.8)*dpr});
+      if(parts.length>240) parts.splice(0, parts.length-240);
+    };
+    window.addEventListener('mousemove', this._trailMove, {passive:true});
+    const tick=()=>{
+      ctx.clearRect(0,0,c.width,c.height);
+      for(let i=parts.length-1;i>=0;i--){ const p=parts[i]; p.x+=p.vx; p.y+=p.vy; p.vy-=.01*dpr; p.life-=.022;
+        if(p.life<=0){ parts.splice(i,1); continue; }
+        ctx.globalAlpha=Math.max(0,p.life)*.8; ctx.shadowBlur=8*dpr; ctx.shadowColor='rgba(217,107,101,.85)';
+        ctx.fillStyle='rgba(217,107,101,1)'; ctx.beginPath(); ctx.arc(p.x,p.y,Math.max(.1,p.r*p.life),0,7); ctx.fill();
+      }
+      ctx.globalAlpha=1; ctx.shadowBlur=0; this._trailRAF=requestAnimationFrame(tick);
+    };
+    tick();
+  }
+
+  _initRail(){
+    const rail=document.querySelector('.purg-rail'); if(!rail) return;
+    const btns=[...rail.querySelectorAll('button')];
+    const secOf=(b)=>document.querySelector('[data-screen-label="'+b.dataset.go+'"]');
+    const setActive=(label)=>{ btns.forEach(b=>b.classList.toggle('active', b.dataset.go===label)); };
+    btns.forEach(b=>{ b.addEventListener('click', ()=>{ const s=secOf(b); if(s){ try{ s.scrollIntoView({behavior:'smooth'}); }catch(e){ s.scrollIntoView(); } } }); });
+    const ST=window.ScrollTrigger;
+    if(ST && this._useGsap){
+      btns.forEach(b=>{ const s=secOf(b); if(!s) return; ST.create({trigger:s, start:'top 55%', end:'bottom 45%', onToggle:(self)=>{ if(self.isActive) setActive(b.dataset.go); }}); });
+    } else {
+      this._railScroll=()=>{ let best=null, bd=1e9; btns.forEach(b=>{ const s=secOf(b); if(!s) return; const d=Math.abs(s.getBoundingClientRect().top); if(d<bd){ bd=d; best=b; } }); if(best) setActive(best.dataset.go); };
+      window.addEventListener('scroll', this._railScroll, {passive:true}); this._railScroll();
+    }
+  }
+
+  _initMagnetic(){
+    if(this._reduceMotion) return;
+    const g=window.gsap;
+    document.querySelectorAll('#comprar a').forEach(a=>{
+      let qx, qy; if(g){ qx=g.quickTo(a,'x',{duration:.4,ease:'power3'}); qy=g.quickTo(a,'y',{duration:.4,ease:'power3'}); }
+      a.addEventListener('mousemove', (e)=>{ const r=a.getBoundingClientRect(); const x=(e.clientX-(r.left+r.width/2))*.3, y=(e.clientY-(r.top+r.height/2))*.4; if(g){ qx(x); qy(y); } else { a.style.transform='translate('+x+'px,'+y+'px)'; } });
+      a.addEventListener('mouseleave', ()=>{ if(g){ qx(0); qy(0); } else { a.style.transform='none'; } });
+    });
+  }
 
   addDepth = (el)=>{ if(el && !this.depth.includes(el)) this.depth.push(el); };
   setBirdParallax = (el)=>{ this.parallax=el; };
