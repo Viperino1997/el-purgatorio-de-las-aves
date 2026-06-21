@@ -1,8 +1,12 @@
 node_modules/
 .DS_Store
+.atl/
 .playwright-mcp/
-before-*.png
-after-*.png
-v2-*.png
-v3-*.png
-v4-*.png
+.vercel/
+
+# dev screenshots (root only)
+/before-*.png
+/after-*.png
+/v2-*.png
+/v3-*.png
+/v4-*.png
