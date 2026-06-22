@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <rect width="100" height="100" rx="18" fill="#0b0f1a"/>
+  <g fill="#c0524f">
+    <!-- body, angled in a descending glide -->
+    <path d="M44,55 C43,46 51,40 60,44 C68,48 69,59 62,64 C55,69 47,64 44,57 Z"/>
+    <!-- upper wing, swept high and back -->
+    <path d="M55,47 C70,30 82,23 95,21 C85,35 74,46 60,53 Z"/>
+    <!-- lower wing, dropped — an asymmetry that reads as a fall, not a soar -->
+    <path d="M48,52 C36,46 26,46 14,50 C26,40 38,40 50,46 Z"/>
+    <!-- tail trailing -->
+    <path d="M45,59 C40,68 35,74 28,81 C39,72 47,67 53,61 Z"/>
+  </g>
+  <circle cx="60" cy="50" r="2.1" fill="#0b0f1a"/>
+  <path fill="#c0524f" d="M63,54 L71,57 L63,59 Z"/>
+  <!-- the soul still smokes -->
+  <path fill="none" stroke="#aeb4c2" stroke-width="2.4" stroke-linecap="round" opacity="0.85" d="M72,57 C81,53 76,45 84,41"/>
+</svg>

@@ -15,8 +15,8 @@
 <helmet>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,ital,wght@9..144,0,300;9..144,0,400;9..144,0,500;9..144,0,600;9..144,1,400;9..144,1,500&family=Source+Serif+4:opsz,wght@8..60,300;8..60,400;8..60,600&family=Special+Elite&display=swap" rel="stylesheet">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%230b0f1a'/%3E%3Cpath d='M28 60 C 37 46,50 42,56 46 C 62 42,75 46,84 60 C 71 53,62 56,56 60 C 50 56,41 53,28 60 Z' fill='%23d96b65'/%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,ital,wght@9..144,0,300;9..144,0,400;9..144,0,500;9..144,0,600;9..144,1,400;9..144,1,500&family=Source+Serif+4:opsz,wght@8..60,300;8..60,400;8..60,600&family=Special+Elite&family=JetBrains+Mono:wght@400;700;800&display=swap" rel="stylesheet">
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
 <style>
   :root{
     --ink:#0b0f1a; --ink-2:#0c1120; --ink-rise:#1a2138;
@@ -117,6 +117,62 @@
   .purg-rail button.active .pr-label{opacity:1;transform:none}
   @media (max-width:900px){.purg-rail{display:none}}
 
+  /* ===== ambient music control — discreet, appears only once the track plays ===== */
+  .purg-sound{position:fixed;bottom:26px;left:26px;z-index:80;display:flex;align-items:center;gap:9px;
+    appearance:none;background:rgba(12,17,32,.62);border:1px solid var(--line);color:var(--mist);
+    font-family:'Special Elite',monospace;font-size:10px;letter-spacing:1.6px;text-transform:uppercase;
+    padding:9px 13px;cursor:pointer;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);
+    opacity:0;transform:translateY(12px);pointer-events:none;
+    transition:opacity .5s ease,transform .5s ease,color .25s ease,border-color .25s ease}
+  .purg-sound.is-on{opacity:1;transform:none;pointer-events:auto}
+  .purg-sound:hover{color:var(--ember-text);border-color:var(--line-strong)}
+  .purg-sound:focus-visible{outline:2px solid var(--focus);outline-offset:3px}
+  .purg-sound svg{display:block;width:15px;height:15px;flex:none}
+  .purg-sound .ps-wave{transition:opacity .25s ease}
+  .purg-sound .ps-slash{opacity:0;transition:opacity .25s ease}
+  .purg-sound.is-muted .ps-wave{opacity:.16}
+  .purg-sound.is-muted .ps-slash{opacity:1}
+  @media (max-width:560px){.purg-sound{bottom:18px;left:14px;padding:8px 11px;font-size:9px}}
+
+  /* ============================================================
+     EASTER EGG — RootRoss Production  (type 97to33)
+     Concept: "Root"Ross + a typed secret code = ROOT ACCESS.
+     An amber-phosphor CRT console boots, authenticates the author,
+     grants access, then decodes the wordmark. The digital
+     antithesis of the analog, hand-etched noir landing.
+     ============================================================ */
+  #purg-rr{position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;
+    background:#050402;opacity:0;visibility:hidden;pointer-events:none;overflow:hidden;
+    transition:opacity .4s ease,visibility .4s}
+  #purg-rr.is-open{opacity:1;visibility:visible;pointer-events:auto}
+  #purg-rr *{box-sizing:border-box}
+  .rr-glow{position:absolute;inset:0;z-index:0;pointer-events:none;
+    background:radial-gradient(62% 60% at 50% 50%, rgba(255,150,0,.16) 0%, transparent 70%)}
+  .rr-scan{position:absolute;inset:0;z-index:3;pointer-events:none;mix-blend-mode:overlay;opacity:.5;
+    background:repeating-linear-gradient(0deg, rgba(0,0,0,0) 0, rgba(0,0,0,0) 2px, rgba(0,0,0,.65) 3px, rgba(0,0,0,0) 4px);
+    animation:rrScan 9s linear infinite}
+  @keyframes rrScan{to{background-position:0 -240px}}
+  .rr-crt{position:absolute;inset:0;z-index:4;pointer-events:none;
+    background:radial-gradient(120% 120% at 50% 50%, transparent 50%, rgba(0,0,0,.85) 100%);
+    box-shadow:inset 0 0 170px rgba(0,0,0,.95)}
+  .rr-flash{position:absolute;inset:0;z-index:5;pointer-events:none;background:#ffb000;opacity:0}
+  .rr-console{position:relative;z-index:2;width:min(860px,90vw);padding:24px;user-select:none;
+    font-family:'JetBrains Mono',ui-monospace,monospace;animation:rrFlicker 5s steps(64) infinite}
+  @keyframes rrFlicker{0%,100%{opacity:1}7%{opacity:.85}8%{opacity:1}53%{opacity:.93}55%{opacity:1}}
+  .rr-log{margin:0 0 clamp(20px,4vh,40px);white-space:pre-wrap;min-height:11.4em;
+    font-size:clamp(11px,1.55vw,15px);line-height:1.9;color:#ffce8a;text-shadow:0 0 6px rgba(255,176,0,.45)}
+  .rr-word{margin:0;font-family:'JetBrains Mono',ui-monospace,monospace;font-weight:800;
+    font-size:clamp(40px,11.5vw,140px);line-height:.92;letter-spacing:-.02em;white-space:nowrap;color:#ffb000;
+    text-shadow:0 0 14px rgba(255,176,0,.6),0 0 48px rgba(255,120,0,.4),.018em 0 rgba(255,60,60,.32),-.018em 0 rgba(60,200,255,.26)}
+  .rr-prod{display:block;margin:16px 0 0;font-family:'JetBrains Mono',ui-monospace,monospace;font-weight:700;
+    font-size:clamp(12px,2vw,20px);letter-spacing:.42em;text-transform:uppercase;color:#ffce8a;text-shadow:0 0 8px rgba(255,176,0,.4)}
+  .rr-cursor{display:inline-block;width:.6em;height:1.05em;margin-left:.14em;background:#ffb000;
+    transform:translateY(.16em);box-shadow:0 0 10px rgba(255,176,0,.7);animation:rrBlink 1s steps(1) infinite}
+  @keyframes rrBlink{50%{opacity:0}}
+  .rr-hint{display:block;margin:clamp(26px,5vh,46px) 0 0;font-family:'JetBrains Mono',ui-monospace,monospace;
+    font-weight:400;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,206,138,.42)}
+  @media (max-width:560px){.rr-prod{letter-spacing:.3em}.rr-log{min-height:12.8em}}
+
   /* honour the user's reduced-motion preference */
   @media (prefers-reduced-motion: reduce){
     *,*::before,*::after{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important;scroll-behavior:auto !important}
@@ -141,6 +197,32 @@
     <a href="#comprar" onClick="{{ goBuy }}" style="display:flex;align-items:center;gap:10px;background:#9a2d2c;color:#f3ecdc;text-decoration:none;font-family:'Special Elite',monospace;font-size:13px;letter-spacing:1.5px;text-transform:uppercase;padding:14px 22px;box-shadow:0 14px 34px rgba(0,0,0,.5)" style-hover="background:#b23b39">
       <span style="width:7px;height:7px;border-radius:50%;background:#f3ecdc;animation:purgEmber 1.8s ease-in-out infinite"></span>Comprar el libro
     </a>
+  </div>
+
+  <!-- Banda sonora: reemplazá assets/music.mp3 por tu pista (mp3). Suena al hacer clic en el ave. -->
+  <audio ref="{{ setAudio }}" preload="none">
+    <source src="assets/music.mp3" type="audio/mpeg">
+  </audio>
+  <button ref="{{ setSound }}" type="button" onClick="{{ toggleSound }}" class="purg-sound" aria-label="Silenciar música" aria-pressed="false">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M4 9 H7 L12 5 V19 L7 15 H4 Z" fill="currentColor" stroke="none"></path>
+      <g class="ps-wave"><path d="M16 9.5 C17.6 11 17.6 13 16 14.5"></path><path d="M18.7 7.4 C21.4 10 21.4 14 18.7 16.6"></path></g>
+      <path class="ps-slash" d="M4 4 L20 20"></path>
+    </svg>
+    <span>Música</span>
+  </button>
+
+  <div id="purg-rr" role="dialog" aria-modal="true" aria-label="RootRoss Production" aria-hidden="true">
+    <div class="rr-glow" aria-hidden="true"></div>
+    <div class="rr-console" aria-hidden="true">
+      <pre class="rr-log"></pre>
+      <h2 class="rr-word">RootRoss</h2>
+      <span class="rr-prod">// Production<span class="rr-cursor"></span></span>
+      <span class="rr-hint">[ pulsá cualquier tecla para salir ]</span>
+    </div>
+    <div class="rr-scan" aria-hidden="true"></div>
+    <div class="rr-crt" aria-hidden="true"></div>
+    <div class="rr-flash" aria-hidden="true"></div>
   </div>
 
   <section ref="{{ setHero }}" data-screen-label="Portada" class="purg-vig" style="position:relative;min-height:100vh;width:100%;background:radial-gradient(130% 100% at 50% 120%, #1a2138 0%, #10182a 42%, #0a0e18 100%);color:#f3ecdc;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 24px 64px;overflow:hidden;text-align:center">
@@ -253,14 +335,28 @@
 
   <section data-screen-label="El índice del purgatorio" class="purg-vig" style="position:relative;width:100%;background:#0c1120;color:#f3ecdc;padding:clamp(110px,15vh,190px) clamp(20px,6vw,80px);overflow:hidden">
     <img src="assets/tree.png" class="purg-drift" style="position:absolute;right:-6%;bottom:-4%;height:min(86%,720px);width:auto;opacity:.07;pointer-events:none;filter:brightness(2)">
-    <div data-reveal="up" style="opacity:0;transform:translateY(28px);transition:opacity .9s cubic-bezier(.2,.6,.2,1),transform .9s cubic-bezier(.2,.6,.2,1);max-width:680px;margin:0 auto 56px;text-align:center;position:relative;z-index:2">
-      <span style="font-family:'Special Elite',monospace;font-size:12px;letter-spacing:3px;text-transform:uppercase;color:var(--ember-text)">III · El árbol de las causas perdidas</span>
-      <h2 style="font-family:'Fraunces',serif;font-weight:400;font-size:clamp(30px,5.4vw,60px);line-height:1.04;letter-spacing:-1px;margin:16px 0 0">Seis ramas, seis<br><span style="font-style:italic">cosas que cuelgan.</span></h2>
-      <p style="font-family:'Source Serif 4',serif;font-weight:300;font-size:clamp(15px,1.8vw,18px);line-height:1.6;color:#9aa0b1;margin:18px auto 0;max-width:46ch">Cada rama sostiene algo que dejó el libro. Abre una para leer lo que pende de ella.</p>
+    <div class="purg-embers purg-embers--tree" aria-hidden="true">
+      <span style="left:22%;animation-duration:9s;animation-delay:.4s"></span>
+      <span style="left:38%;animation-duration:11s;animation-delay:2.2s"></span>
+      <span style="left:54%;animation-duration:9.8s;animation-delay:3.6s"></span>
+      <span style="left:69%;animation-duration:12s;animation-delay:1.2s"></span>
+      <span style="left:83%;animation-duration:10.4s;animation-delay:4.4s"></span>
+    </div>
+
+    <div style="max-width:880px;margin:0 auto 66px;text-align:center;position:relative;z-index:2">
+      <span data-reveal="up" style="opacity:0;transform:translateY(20px);transition:opacity .9s cubic-bezier(.2,.6,.2,1),transform .9s cubic-bezier(.2,.6,.2,1);display:inline-block;font-family:'Special Elite',monospace;font-size:12px;letter-spacing:3px;text-transform:uppercase;color:var(--ember-text)">III · El árbol de las causas perdidas</span>
+
+      <p ref="{{ setManifesto }}" class="purg-manifesto" style="font-family:'Fraunces',serif;font-weight:300;font-size:clamp(26px,5vw,52px);line-height:1.2;letter-spacing:-.6px;margin:28px auto 0;max-width:min(640px,92%);color:#f3ecdc">Escribí este libro para todo lo que <span style="font-style:italic;color:var(--ember-bright)">no pudo quedarse</span>, y para todo lo que <span style="font-style:italic;color:var(--ember-bright)">nunca terminó de irse.</span></p>
+
+      <div class="purg-manifesto-rule" aria-hidden="true" style="margin:36px auto 0;width:min(440px,72%)">
+        <svg width="100%" height="2" viewBox="0 0 440 2" preserveAspectRatio="none"><defs><linearGradient id="purgRuleGrad" x1="0" x2="440" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#9a2d2c" stop-opacity="0"></stop><stop offset="0.5" stop-color="#d96b65"></stop><stop offset="1" stop-color="#9a2d2c" stop-opacity="0"></stop></linearGradient></defs><line x1="0" y1="1" x2="440" y2="1" stroke="url(#purgRuleGrad)" stroke-width="2"></line></svg>
+      </div>
+
+      <span data-reveal="up" style="opacity:0;transform:translateY(20px);transition:opacity .9s cubic-bezier(.2,.6,.2,1) .15s,transform .9s cubic-bezier(.2,.6,.2,1) .15s;display:inline-block;margin-top:26px;font-family:'Special Elite',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#7e8597">lo que el libro dejó colgando · abre cada rama</span>
     </div>
 
     <div style="max-width:880px;margin:0 auto;position:relative;z-index:2;border-top:1px solid #25304d">
-      <sc-for list="{{ causas }}" as="c" hint-placeholder-count="6">
+      <sc-for list="{{ causas }}" as="c" hint-placeholder-count="4">
         <div onClick="{{ c.toggle }}" tabindex="0" role="button" aria-expanded="{{ c.expanded }}" data-causa="{{ c.num }}" data-reveal="up" class="purg-row" style="opacity:0;transform:translateY(22px);transition:opacity .7s ease,transform .7s ease,background .3s ease;border-bottom:1px solid var(--line);cursor:pointer;padding:clamp(20px,3vw,30px) 6px" style-hover="background:rgba(154,45,44,.07)">
           <div style="display:flex;align-items:baseline;gap:clamp(16px,3vw,40px)">
             <span style="font-family:'Special Elite',monospace;font-size:13px;color:var(--ember-text);flex:none;width:28px">{{ c.num }}</span>
@@ -269,7 +365,39 @@
             <span style="flex:none;font-family:'Special Elite',monospace;font-size:18px;line-height:1;color:var(--ember-text);width:24px;text-align:center">{{ c.sign }}</span>
           </div>
           <sc-if value="{{ c.open }}" hint-placeholder-val="{{ false }}">
-            <p style="margin:18px 0 4px;padding-left:calc(28px + clamp(16px,3vw,40px));font-family:'Source Serif 4',serif;font-weight:300;font-size:clamp(16px,2vw,20px);line-height:1.7;color:#c4c9d6;max-width:62ch">{{ c.body }}</p>
+            <div style="margin:16px 0 6px;padding-left:calc(28px + clamp(16px,3vw,40px));max-width:58ch">
+
+              <sc-if value="{{ c.intro }}">
+                <p style="margin:0;font-family:'Source Serif 4',serif;font-weight:300;font-size:clamp(16px,2vw,20px);line-height:1.7;color:#c4c9d6">{{ c.intro }}</p>
+              </sc-if>
+
+              <sc-if value="{{ c.quote }}">
+                <blockquote style="margin:6px 0 6px;padding:8px 0 8px 22px;border-left:2px solid var(--ember);font-family:'Fraunces',serif;font-weight:400;font-style:italic;font-size:clamp(24px,4.4vw,38px);line-height:1.3;letter-spacing:-.3px;color:#f3ecdc;text-wrap:balance">{{ c.quote }}</blockquote>
+              </sc-if>
+
+              <sc-if value="{{ c.items }}">
+                <ul style="list-style:none;margin:18px 0 2px;padding:0;display:flex;flex-direction:column;gap:11px">
+                  <sc-for list="{{ c.items }}" as="it">
+                    <li style="display:flex;align-items:flex-start;gap:14px;font-family:'Fraunces',serif;font-weight:400;font-size:clamp(18px,2.4vw,24px);line-height:1.3;color:#e8e1cf">
+                      <span aria-hidden="true" style="flex:none;width:6px;height:6px;margin-top:.55em;border-radius:50%;background:var(--ember-text);box-shadow:0 0 7px 1px rgba(217,107,101,.5)"></span>
+                      <span>{{ it }}</span>
+                    </li>
+                  </sc-for>
+                </ul>
+              </sc-if>
+
+              <sc-if value="{{ c.link }}">
+                <a href="{{ c.link }}" onClick="{{ stop }}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:14px;margin:18px 0 0;padding:13px 22px 13px 15px;border:1px solid var(--line-strong);text-decoration:none;color:#f3ecdc;background:rgba(255,255,255,.02);transition:border-color .25s ease,background .25s ease" style-hover="border-color:var(--ember-text);background:rgba(154,45,44,.10)">
+                  <span aria-hidden="true" style="flex:none;display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;border:1px solid var(--line-strong);color:var(--ember-text);font-size:11px;padding-left:2px">▶</span>
+                  <span style="display:flex;flex-direction:column;gap:3px">
+                    <span style="font-family:'Special Elite',monospace;font-size:13px;letter-spacing:1.5px;text-transform:uppercase">Escuchar la playlist</span>
+                    <span style="font-family:'Source Serif 4',serif;font-weight:300;font-size:12px;letter-spacing:.4px;color:#9aa0b1">en Spotify · abre en otra pestaña</span>
+                  </span>
+                </a>
+                <p style="margin:18px 0 2px;font-family:'Fraunces',serif;font-weight:400;font-style:italic;font-size:clamp(15px,1.9vw,19px);line-height:1.5;color:#8f96a8;max-width:46ch;text-wrap:pretty">«{{ c.caption }}»</p>
+              </sc-if>
+
+            </div>
           </sc-if>
         </div>
       </sc-for>
@@ -299,8 +427,7 @@
     <p data-reveal="up" style="opacity:0;transform:translateY(28px);transition:opacity 1s ease .2s,transform 1s ease .2s;font-family:'Source Serif 4',serif;font-weight:300;font-size:clamp(16px,2vw,19px);line-height:1.7;color:#c4c9d6;margin:30px 0 0;max-width:42ch;position:relative;z-index:2">Cuarenta poemas para los desvelados. El PDF llega directo a tu correo después de la compra.</p>
 
     <div data-reveal="up" style="opacity:0;transform:translateY(28px);transition:opacity 1s ease .3s,transform 1s ease .3s;display:flex;gap:16px;flex-wrap:wrap;justify-content:center;margin-top:42px;width:100%;max-width:460px;position:relative;z-index:2">
-      <a href="https://pay.hotmart.com/I106421745S" target="_blank" rel="noopener" class="purg-cta-primary" style="flex:1 1 200px;min-width:190px;height:56px;display:flex;align-items:center;justify-content:center;background:#9a2d2c;color:#f3ecdc;font-family:'Special Elite',monospace;font-size:14px;letter-spacing:1.2px;text-transform:uppercase;text-decoration:none" style-hover="background:#b23b39" style-active="background:#7a2120">Comprar en Hotmart</a>
-      <a href="#" style="flex:1 1 200px;min-width:190px;height:56px;display:flex;align-items:center;justify-content:center;background:transparent;border:1px solid var(--line-strong);color:#e8e1cf;font-family:'Special Elite',monospace;font-size:14px;letter-spacing:1.2px;text-transform:uppercase;text-decoration:none" style-hover="background:rgba(255,255,255,.05);border-color:#e8e1cf">Apóyame en Cafecito</a>
+      <a href="https://pay.hotmart.com/I106421745S" target="_blank" rel="noopener" class="purg-cta-primary" style="flex:0 1 auto;min-width:240px;height:56px;padding:0 54px;display:flex;align-items:center;justify-content:center;background:#9a2d2c;color:#f3ecdc;font-family:'Special Elite',monospace;font-size:14px;letter-spacing:1.2px;text-transform:uppercase;text-decoration:none" style-hover="background:#b23b39" style-active="background:#7a2120">Comprar en Hotmart</a>
     </div>
 
     <p data-reveal="up" style="opacity:0;transform:translateY(28px);transition:opacity 1s ease .4s,transform 1s ease .4s;font-family:'Special Elite',monospace;font-size:11px;letter-spacing:1.5px;color:#7e8597;margin:38px 0 0;position:relative;z-index:2">entrega digital · pago seguro · sin envío físico</p>
@@ -372,12 +499,23 @@ class Component extends DCLogic {
       if(e.key!=='Enter' && e.key!==' ' && e.key!=='Spacebar') return;
       const t=e.target;
       if(!t || !t.closest) return;
+      if(t.closest('a')) return;   // let links handle their own Enter (Spotify, Hotmart)
       const row=t.closest('[data-causa]');
       if(row){ e.preventDefault(); this.toggleCausa(row.getAttribute('data-causa')); return; }
       if(t.closest('[data-depart]')){ e.preventDefault(); this.depart(); return; }
       if(t.closest('[data-restore]')){ e.preventDefault(); this.restore(); }
     };
     window.addEventListener('keydown', this._key);
+
+    // hidden signature — type "97to33" anywhere to summon RootRoss Production
+    this._egBuf='';
+    this._egKeydown=(e)=>{
+      if(this._egOpen){ if(e&&e.preventDefault) e.preventDefault(); this._hideRR(); return; }   // any key returns
+      if(!e.key || e.key.length!==1) return;
+      this._egBuf=(this._egBuf+e.key.toLowerCase()).slice(-6);
+      if(this._egBuf==='97to33'){ this._egBuf=''; this._revealRR(); }
+    };
+    window.addEventListener('keydown', this._egKeydown);
 
     // motion layer (GSAP) — progressive enhancement; degrades to the CSS reveal above
     this._initGSAP();
@@ -386,6 +524,7 @@ class Component extends DCLogic {
     this._initVeil();
     this._initRail();
     this._initMagnetic();
+    this._initManifesto();
   }
   componentWillUnmount(){
     if(this._mm) window.removeEventListener('mousemove', this._mm);
@@ -394,9 +533,13 @@ class Component extends DCLogic {
     if(this._revealSafety) clearTimeout(this._revealSafety);
     if(this._pillCheck) window.removeEventListener('scroll', this._pillCheck);
     if(this._key) window.removeEventListener('keydown', this._key);
-    try{ if(window.ScrollTrigger) window.ScrollTrigger.getAll().forEach(t=>t.kill()); if(this._split && this._split.revert) this._split.revert(); }catch(e){}
+    try{ if(window.ScrollTrigger) window.ScrollTrigger.getAll().forEach(t=>t.kill()); if(this._split && this._split.revert) this._split.revert(); if(this._manifestoSplit && this._manifestoSplit.revert) this._manifestoSplit.revert(); }catch(e){}
     if(this._railScroll) window.removeEventListener('scroll', this._railScroll);
     if(this._veilTimer) clearTimeout(this._veilTimer);
+    if(this.audio){ try{ this.audio.pause(); }catch(e){} }
+    if(this._egKeydown) window.removeEventListener('keydown', this._egKeydown);
+    if(this._egTimers){ this._egTimers.forEach(clearTimeout); }
+    if(this._egRAF){ cancelAnimationFrame(this._egRAF); }
   }
 
   _initGSAP(){
@@ -471,6 +614,106 @@ class Component extends DCLogic {
     }
   }
 
+  // RootRoss Production — a root-access console. You typed the secret key; access granted.
+  _rrLines(){
+    return [
+      'root@rootross:~$ access --key 97to33',
+      'autenticando ········· OK',
+      'identidad ... Mercedes G. Ross',
+      'obra ........ El purgatorio de las aves',
+      'clearance ... root',
+      'ACCESO CONCEDIDO'
+    ];
+  }
+  _typeLog(lines, el, done){
+    el.textContent='';
+    let li=0, ci=0; const self=this;
+    const tick=()=>{
+      if(!self._egOpen) return;
+      if(li>=lines.length){ done&&done(); return; }
+      const line=lines[li];
+      if(ci<line.length){ el.textContent+=line[ci]; ci++; self._egTimers.push(setTimeout(tick, 11+Math.random()*26)); }
+      else { el.textContent+='\n'; li++; ci=0; self._egTimers.push(setTimeout(tick, 150)); }
+    };
+    tick();
+  }
+  _scramble(el, finalText, duration, done){
+    const chars='ABCDEFGHJKLMNPQRSTUVWXYZ0123456789#%&/<>*+=';
+    const start=performance.now(); const self=this;
+    const step=(now)=>{
+      if(!self._egOpen) return;
+      const t=Math.min(1,(now-start)/duration);
+      const reveal=Math.floor(t*finalText.length);
+      let out='';
+      for(let i=0;i<finalText.length;i++){ out += i<reveal ? finalText[i] : chars[(Math.random()*chars.length)|0]; }
+      el.textContent=out;
+      if(t<1){ self._egRAF=requestAnimationFrame(step); } else { el.textContent=finalText; done&&done(); }
+    };
+    self._egRAF=requestAnimationFrame(step);
+  }
+  _revealRR(){
+    const el=document.getElementById('purg-rr'); if(!el || this._egOpen) return;
+    this._egOpen=true; this._egTimers=[]; this._egRAF=0;
+    el.classList.add('is-open'); el.setAttribute('aria-hidden','false');
+    this._egPrevOverflow=document.documentElement.style.overflow;
+    document.documentElement.style.overflow='hidden';
+    this._egDismiss=()=>this._hideRR(); el.addEventListener('click', this._egDismiss);
+    const log=el.querySelector('.rr-log'), word=el.querySelector('.rr-word'),
+          prod=el.querySelector('.rr-prod'), hint=el.querySelector('.rr-hint'), flash=el.querySelector('.rr-flash');
+    const lines=this._rrLines(), g=window.gsap;
+    if(this._reduceMotion || !g){ log.textContent=lines.join('\n'); word.textContent='RootRoss'; return; }
+    // boot first, payoff hidden
+    g.set([word,prod,hint],{opacity:0}); g.set(word,{scale:.96}); g.set([prod,hint],{y:14});
+    this._typeLog(lines, log, ()=>{
+      if(!this._egOpen) return;
+      g.timeline()
+        .to(flash,{opacity:.5,duration:.08})
+        .to(flash,{opacity:0,duration:.55,ease:'power2.out'})
+        .set(word,{opacity:1})
+        .to(word,{scale:1,duration:.7,ease:'power3.out'},'<')
+        .add(()=>{ this._scramble(word,'RootRoss',1000,()=>{
+          if(!this._egOpen) return;
+          g.to([prod,hint],{opacity:1,y:0,duration:.5,stagger:.14,ease:'power2.out'});
+        }); }, '<0.05');
+    });
+  }
+  _hideRR(){
+    const el=document.getElementById('purg-rr'); if(!el || !this._egOpen) return;
+    this._egOpen=false;
+    el.classList.remove('is-open'); el.setAttribute('aria-hidden','true');
+    document.documentElement.style.overflow=this._egPrevOverflow||'';
+    if(this._egDismiss){ el.removeEventListener('click', this._egDismiss); this._egDismiss=null; }
+    if(this._egTimers){ this._egTimers.forEach(clearTimeout); this._egTimers=[]; }
+    if(this._egRAF){ cancelAnimationFrame(this._egRAF); this._egRAF=0; }
+  }
+
+  // the manifesto: the book's thesis, revealed word by word as you descend into the tree
+  _initManifesto(){
+    const p=this.manifesto; if(!p) return;
+    const g=window.gsap, ST=window.ScrollTrigger, ST2=window.SplitText;
+    const rule=document.querySelector('.purg-manifesto-rule line');
+    // reduced-motion or no GSAP: leave the text fully legible, draw the rule statically
+    if(this._reduceMotion || !g || !ST || !ST2){
+      if(rule){ rule.style.strokeDasharray='none'; }
+      return;
+    }
+    const build=()=>{
+      try{
+        const split=ST2.create(p, {type:'words', mask:'words', aria:'auto'});
+        this._manifestoSplit=split;
+        g.set(split.words, {yPercent:120, opacity:0});
+        const RULE_LEN=440;
+        if(rule){ rule.style.strokeDasharray=RULE_LEN; rule.style.strokeDashoffset=RULE_LEN; }
+        const tl=g.timeline({scrollTrigger:{trigger:p, start:'top 80%', once:true}});
+        tl.to(split.words, {yPercent:0, opacity:1, duration:1.1, ease:'power4.out', stagger:0.045})
+          .to(rule, {strokeDashoffset:0, duration:1.2, ease:'power2.inOut'}, '-=0.6');
+        try{ ST.refresh(); }catch(e){}
+      }catch(e){ try{ g.set(p,{opacity:1}); }catch(_){} }
+    };
+    // split only once webfonts are ready, so word wrapping is measured correctly
+    if(document.fonts && document.fonts.ready){ document.fonts.ready.then(build); } else { build(); }
+  }
+
   _initMagnetic(){
     if(this._reduceMotion) return;
     const g=window.gsap;
@@ -487,8 +730,10 @@ class Component extends DCLogic {
   setHero = (el)=>{ this.hero=el; };
   setPill = (el)=>{ this.pill=el; };
   setBuy = (el)=>{ this.buy=el; };
+  setManifesto = (el)=>{ this.manifesto=el; };
 
   depart = ()=>{
+    this._startMusic();                    // the bird's click is the user gesture that unlocks audio
     if(this.state.departed) return;
     this.setState({departed:true});
     this._refreshST();
@@ -501,6 +746,49 @@ class Component extends DCLogic {
     }, 760);
   };
   restore = ()=>{ this.setState({departed:false}); this._refreshST(); };
+  stop = (e)=>{ if(e && e.stopPropagation) e.stopPropagation(); };
+
+  setAudio = (el)=>{ this.audio=el; if(el){ el.loop=true; el.playsInline=true; } };   // runtime passes loop="" → force the booleans in JS
+  setSound = (el)=>{ this.sound=el; };
+  _readMusicPref(){ try{ return localStorage.getItem('purgMusic'); }catch(e){ return null; } }
+  _writeMusicPref(v){ try{ localStorage.setItem('purgMusic', v); }catch(e){} }
+  _reflectSound(muted){
+    if(!this.sound) return;
+    this.sound.classList.toggle('is-muted', !!muted);
+    this.sound.setAttribute('aria-pressed', muted?'true':'false');
+    this.sound.setAttribute('aria-label', muted?'Activar música':'Silenciar música');
+  }
+  // start the soundtrack — only from a user gesture (the bird), and only reveal the
+  // control if playback actually succeeds (no dead button before a track is added)
+  _startMusic = ()=>{
+    const a=this.audio; if(!a || this._musicOn) return;
+    a.loop=true; a.playsInline=true;             // not in markup (React would reset) — enforce here
+    const muted = this._readMusicPref()==='off';
+    const TARGET = 0.55;
+    a.muted = muted;
+    a.volume = muted ? TARGET : 0;
+    const reveal = ()=>{
+      this._musicOn = true;
+      if(this.sound) this.sound.classList.add('is-on');
+      this._reflectSound(muted);
+      if(!muted){
+        const g=window.gsap;
+        if(g) g.to(a, {volume:TARGET, duration:2.2, ease:'power1.out'}); else a.volume=TARGET;
+      }
+    };
+    const p = a.play();
+    if(p && p.then) p.then(reveal).catch(()=>{ /* no track yet or blocked — stay hidden, retry next gesture */ });
+    else reveal();
+  };
+  toggleSound = (e)=>{
+    if(e && e.preventDefault) e.preventDefault();
+    const a=this.audio; if(!a) return;
+    const muted = !a.muted;
+    a.muted = muted;
+    if(!muted && a.paused){ const pr=a.play(); if(pr&&pr.catch) pr.catch(()=>{}); }
+    this._writeMusicPref(muted?'off':'on');
+    this._reflectSound(muted);
+  };
   goBuy = (e)=>{
     if(e&&e.preventDefault) e.preventDefault();
     if(this.buy){ try{ this.buy.scrollIntoView; }catch(x){} }
@@ -511,12 +799,18 @@ class Component extends DCLogic {
 
   renderVals(){
     const raw=[
-      {num:'01', label:'Banda sonora', title:'Playlist', body:'Las canciones que sonaban a las cinco de la mañana, cuando el insomnio dictaba cada verso y la ciudad fingía dormir.'},
-      {num:'02', label:'Geografía', title:'Lugares', body:'Bares que cerraban tarde, andenes vacíos, azoteas frías. Los sitios donde una causa perdida encuentra compañía.'},
-      {num:'03', label:'Los que pasaron', title:'Personas', body:'Las que se fueron sin avisar, las que nunca llegaron a quedarse, las que aún regresan en sueños ajenos.'},
-      {num:'04', label:'Voces prestadas', title:'Autores', body:'Poetas de cantina y de madrugada cuyas líneas se colaron, sin permiso, entre estas páginas.'},
-      {num:'05', label:'Notas al margen', title:'Referencias', body:'Versos prestados y citas robadas: los libros que se leían en voz baja, a oscuras, para no despertar a nadie.'},
-      {num:'06', label:'Lo que dijeron', title:'Comentarios', body:'Anotaciones de los primeros lectores, garabateadas al borde de la página como en un libro prestado que no se piensa devolver.'}
+      {num:'01', label:'Banda sonora', title:'Playlist',
+        intro:'Las canciones que sonaban a las cinco de la mañana, cuando el insomnio dictaba cada verso y la ciudad fingía dormir.',
+        link:'https://open.spotify.com/playlist/0HME53L1w7MtBsB8E06V0B',
+        caption:'de noche escribo mejor, al compás de tanto ritmo y tanto afán'},
+      {num:'02', label:'Geografía', title:'Lugares',
+        intro:'Los sitios donde una causa perdida encuentra compañía.',
+        items:['Claypole','Don Orione','Barrio Muller','El convento de Madre Tránsito','La casa de mi abuela Susi','La cama de Liz','Los brazos de Anto']},
+      {num:'03', label:'Los que pasaron', title:'Personas',
+        quote:'A Sebastián le dedico todos mis logros.'},
+      {num:'04', label:'Voces prestadas', title:'Autores',
+        intro:'Poetas de cantina y de madrugada cuyas líneas se colaron, sin permiso, entre estas páginas.',
+        items:['Kafka','Dostoyevski','Storni','Pizarnik','Bukowski','Sbarra','Francisco de Asís','Casona','Murgos']}
     ];
     const open=this.state.openCausa;
     const causas=raw.map(c=>({ ...c, open: open===c.num, expanded: open===c.num? 'true':'false', sign: open===c.num? '–':'+', toggle: ()=>this.toggleCausa(c.num) }));
@@ -527,9 +821,10 @@ class Component extends DCLogic {
       birdOpacity: dep?0:1,
       smokeOpacity: dep?0:1,
       progress:this.state.progress,
-      depart:this.depart, restore:this.restore, goBuy:this.goBuy,
+      depart:this.depart, restore:this.restore, goBuy:this.goBuy, stop:this.stop,
       addDepth:this.addDepth, setBirdParallax:this.setBirdParallax, setTitle:this.setTitle,
-      setHero:this.setHero, setPill:this.setPill, setBuy:this.setBuy,
+      setHero:this.setHero, setPill:this.setPill, setBuy:this.setBuy, setManifesto:this.setManifesto,
+      setAudio:this.setAudio, setSound:this.setSound, toggleSound:this.toggleSound,
       causas
     };
   }

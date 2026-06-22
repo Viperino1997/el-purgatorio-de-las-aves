@@ -10,3 +10,7 @@ node_modules/
 /v2-*.png
 /v3-*.png
 /v4-*.png
+/purg-*.png
+# never commit hotmart account/financial captures
+hotmart-*.png
+.vercel
