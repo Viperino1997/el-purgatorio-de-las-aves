@@ -48,6 +48,10 @@
     .purg-ghost--sm{width:74px !important}
     .purg-ghost--md{width:92px !important}
   }
+  /* on narrow phones the row teaser label pushes the "+" toggle off-screen — drop it */
+  @media (max-width:374px){
+    .purg-row-label{display:none !important}
+  }
 
   /* ============================================================
      ELEVATION LAYER — atmosphere, editorial detail, depth.
@@ -249,7 +253,7 @@
 
     <span style="position:relative;z-index:2;font-family:'Special Elite',monospace;font-size:clamp(10px,2.2vw,13px);letter-spacing:4px;color:var(--ember-text);text-transform:uppercase;margin-bottom:18px">Recopilado de causas perdidas</span>
 
-    <h1 ref="{{ setTitle }}" class="purg-title" style="position:relative;z-index:2;font-family:'Fraunces',serif;font-weight:300;font-size:clamp(46px,12vw,150px);line-height:.9;letter-spacing:-2px;margin:0;text-transform:uppercase;will-change:transform">
+    <h1 ref="{{ setTitle }}" class="purg-title" style="position:relative;z-index:2;font-family:'Fraunces',serif;font-weight:300;font-size:clamp(40px,12vw,150px);line-height:.9;letter-spacing:-2px;margin:0;text-transform:uppercase;will-change:transform">
       <span style="display:block">El purgatorio</span>
       <span style="display:block;font-style:italic;font-weight:400">de las <span class="purg-ember-word" style="color:var(--ember-bright)">aves</span></span>
     </h1>
@@ -361,7 +365,7 @@
           <div style="display:flex;align-items:baseline;gap:clamp(16px,3vw,40px)">
             <span style="font-family:'Special Elite',monospace;font-size:13px;color:var(--ember-text);flex:none;width:28px">{{ c.num }}</span>
             <h3 style="flex:1 1 auto;margin:0;font-family:'Fraunces',serif;font-weight:400;font-size:clamp(24px,4.4vw,46px);line-height:1;letter-spacing:-.5px;color:#f3ecdc">{{ c.title }}</h3>
-            <span style="flex:none;font-family:'Special Elite',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:#7e8597;align-self:center">{{ c.label }}</span>
+            <span class="purg-row-label" style="flex:none;font-family:'Special Elite',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:#7e8597;align-self:center">{{ c.label }}</span>
             <span style="flex:none;font-family:'Special Elite',monospace;font-size:18px;line-height:1;color:var(--ember-text);width:24px;text-align:center">{{ c.sign }}</span>
           </div>
           <sc-if value="{{ c.open }}" hint-placeholder-val="{{ false }}">
@@ -485,8 +489,16 @@ class Component extends DCLogic {
 
     this._pillCheck = ()=>{
       if(!this.hero || !this.pill) return;
-      const r=this.hero.getBoundingClientRect();
-      const show = r.bottom < (window.innerHeight||0)*0.5;
+      const vh = window.innerHeight||0;
+      const r = this.hero.getBoundingClientRect();
+      let show = r.bottom < vh*0.5;
+      // hand off to the closing sections: once "Sobre la autora" reaches the lower
+      // viewport the fixed pill would overprint its content (and the buy section has
+      // its own CTA), so fade the pill out from there on.
+      if(show){
+        const endZone = this._pillEndZone || (this._pillEndZone = document.querySelector('[data-screen-label="Sobre la Autora"]'));
+        if(endZone && endZone.getBoundingClientRect().top < vh*0.9) show = false;
+      }
       this.pill.style.opacity = show? '1':'0';
       this.pill.style.transform = show? 'translateY(0)':'translateY(14px)';
       this.pill.style.pointerEvents = show? 'auto':'none';
@@ -564,8 +576,11 @@ class Component extends DCLogic {
       if(window.SplitText && this.title){
         g.set(this.title, {opacity:1});
         // autoSplit waits for webfonts and re-splits on width change (official best practice)
+        // split into words AND chars: each word stays an unbreakable inline-block,
+        // so the line can only wrap between words — never mid-word (no orphan letters).
+        // chars are still animated individually to keep the letter-by-letter stagger.
         this._split = window.SplitText.create(this.title, {
-          type:'chars', autoSplit:true,
+          type:'words,chars', autoSplit:true,
           onSplit:(self)=> g.from(self.chars, {yPercent:130, opacity:0, ease:'power4.out', duration:.9, stagger:.03})
         });
       }
